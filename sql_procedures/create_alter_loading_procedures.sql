@@ -1,3 +1,11 @@
+-- !!! WARNING: These procedures will DROP and RECREATE the target tables. !!!
+-- This is to ensure a clean load of data from the Cronometer export files.
+-- Make sure to back up any existing data if necessary before executing these procedures.
+-- This script is intended for use with the Cronometer data export files.
+-- Ensure all export files are present in the downloads directory before running this script.
+-- This file only creates or alters the loading procedures. To execute the loading, run the Load_All_Cronometer_Data procedure. via the `EXEC dbo.Load_All_Cronometer_Data;` command.
+
+
 -- =============================================
 -- MAIN LOADING PROCEDURE
 -- =============================================
