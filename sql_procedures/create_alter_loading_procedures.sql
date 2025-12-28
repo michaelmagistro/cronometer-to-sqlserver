@@ -3,34 +3,36 @@
 -- Make sure to back up any existing data if necessary before executing these procedures.
 -- This script is intended for use with the Cronometer data export files.
 -- Ensure all export files are present in the downloads directory before running this script.
--- This file only creates or alters the loading procedures. To execute the loading, run the Load_All_Cronometer_Data procedure. via the `EXEC dbo.Load_All_Cronometer_Data;` command.
+-- This file only creates or alters the loading procedures. To execute the loading, run: `EXEC dbo.Load_All_Cronometer_Data @base_path = 'C:\exports\cronometer\';`
 
+USE Cronometer -- !!! WARNING: Change to your target database name if not Cronometer !!!
+GO
 
 -- =============================================
 -- MAIN LOADING PROCEDURE
 -- =============================================
-CREATE OR ALTER PROCEDURE dbo.Load_All_Cronometer_Data
+CREATE OR ALTER PROCEDURE dbo.Load_All_Cronometer_Data @base_path NVARCHAR(500)
 AS
 BEGIN
     SET NOCOUNT ON;
 
     PRINT 'Loading Biometrics...'
-    EXEC dbo.Load_Biometrics;
+    EXEC dbo.Load_Biometrics @base_path = @base_path;
 
     PRINT 'Loading Daily Summary...'
-    EXEC dbo.Load_DailySummary;
+    EXEC dbo.Load_DailySummary @base_path = @base_path;
 
     PRINT 'Loading Exercises...'
-    EXEC dbo.Load_Exercises;
+    EXEC dbo.Load_Exercises @base_path = @base_path;
 
     PRINT 'Loading Fasts...'
-    EXEC dbo.Load_Fasts;
+    EXEC dbo.Load_Fasts @base_path = @base_path;
 
     PRINT 'Loading Notes...'
-    EXEC dbo.Load_Notes;
+    EXEC dbo.Load_Notes @base_path = @base_path;
 
     PRINT 'Loading Servings...'
-    EXEC dbo.Load_Servings;
+    EXEC dbo.Load_Servings @base_path = @base_path;
 
     PRINT 'All Cronometer data loaded successfully!'
 END
@@ -39,7 +41,7 @@ GO
 -- =============================================
 -- Load DailySummary
 -- =============================================
-CREATE OR ALTER PROCEDURE dbo.Load_DailySummary
+CREATE OR ALTER PROCEDURE dbo.Load_DailySummary @base_path NVARCHAR(500)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -139,23 +141,24 @@ BEGIN
         [Completed] NVARCHAR(10) NULL
     );
 
-    BULK INSERT dbo.DailySummary
-    FROM 'C:\exports\cronometer\DailySummary.csv'
-    WITH (
-        FORMAT = 'CSV',
-        FIRSTROW = 2,
-        FIELDTERMINATOR = ',',
-        ROWTERMINATOR = '0x0a',
-        FIELDQUOTE = '"',
-        TABLOCK
-    );
+    DECLARE @file_path NVARCHAR(1000) = @base_path + N'DailySummary.csv';
+    DECLARE @sql NVARCHAR(MAX);
+    SET @sql = N'BULK INSERT dbo.DailySummary FROM ''' + @file_path + N''' WITH (' +
+        N'FORMAT = ''CSV'',' +
+        N'FIRSTROW = 2,' +
+        N'FIELDTERMINATOR = '','',' +
+        N'ROWTERMINATOR = ''0x0a'',' +
+        N'FIELDQUOTE = ''"'',' +
+        N'TABLOCK' +
+        N');';
+    EXEC(@sql);
 END
 GO
 
 -- =============================================
 -- Load Servings
 -- =============================================
-CREATE OR ALTER PROCEDURE dbo.Load_Servings
+CREATE OR ALTER PROCEDURE dbo.Load_Servings @base_path NVARCHAR(500)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -259,23 +262,24 @@ BEGIN
         [Category] NVARCHAR(100) NULL
     );
 
-    BULK INSERT dbo.Servings
-    FROM 'C:\exports\cronometer\servings.csv'
-    WITH (
-        FORMAT = 'CSV',
-        FIRSTROW = 2,
-        FIELDTERMINATOR = ',',
-        ROWTERMINATOR = '0x0a',
-        FIELDQUOTE = '"',
-        TABLOCK
-    );
+    DECLARE @file_path NVARCHAR(1000) = @base_path + N'servings.csv';
+    DECLARE @sql NVARCHAR(MAX);
+    SET @sql = N'BULK INSERT dbo.Servings FROM ''' + @file_path + N''' WITH (' +
+        N'FORMAT = ''CSV'',' +
+        N'FIRSTROW = 2,' +
+        N'FIELDTERMINATOR = '','',' +
+        N'ROWTERMINATOR = ''0x0a'',' +
+        N'FIELDQUOTE = ''"'',' +
+        N'TABLOCK' +
+        N');';
+    EXEC(@sql);
 END
 GO
 
 -- =============================================
 -- Load Exercises
 -- =============================================
-CREATE OR ALTER PROCEDURE dbo.Load_Exercises
+CREATE OR ALTER PROCEDURE dbo.Load_Exercises @base_path NVARCHAR(500)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -292,23 +296,24 @@ BEGIN
         [Calories_Burned] FLOAT NOT NULL
     );
 
-    BULK INSERT dbo.Exercises
-    FROM 'C:\exports\cronometer\exercises.csv'
-    WITH (
-        FORMAT = 'CSV',
-        FIRSTROW = 2,        -- Skip header row
-        FIELDTERMINATOR = ',',
-        ROWTERMINATOR = '0x0a',
-        FIELDQUOTE = '"',
-        TABLOCK
-    );
+    DECLARE @file_path NVARCHAR(1000) = @base_path + N'exercises.csv';
+    DECLARE @sql NVARCHAR(MAX);
+    SET @sql = N'BULK INSERT dbo.Exercises FROM ''' + @file_path + N''' WITH (' +
+        N'FORMAT = ''CSV'',' +
+        N'FIRSTROW = 2,' +
+        N'FIELDTERMINATOR = '','',' +
+        N'ROWTERMINATOR = ''0x0a'',' +
+        N'FIELDQUOTE = ''"'',' +
+        N'TABLOCK' +
+        N');';
+    EXEC(@sql);
 END
 GO
 
 -- =============================================
 -- Load Biometrics
 -- =============================================
-CREATE OR ALTER PROCEDURE dbo.Load_Biometrics
+CREATE OR ALTER PROCEDURE dbo.Load_Biometrics @base_path NVARCHAR(500)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -325,23 +330,24 @@ BEGIN
         [Amount] FLOAT NOT NULL
     );
 
-    BULK INSERT dbo.Biometrics
-    FROM 'C:\exports\cronometer\biometrics.csv'
-    WITH (
-        FORMAT = 'CSV',
-        FIRSTROW = 2,                    -- Skip header
-        FIELDTERMINATOR = ',',
-        ROWTERMINATOR = '0x0a',
-        FIELDQUOTE = '"',
-        TABLOCK
-    );
+    DECLARE @file_path NVARCHAR(1000) = @base_path + N'biometrics.csv';
+    DECLARE @sql NVARCHAR(MAX);
+    SET @sql = N'BULK INSERT dbo.Biometrics FROM ''' + @file_path + N''' WITH (' +
+        N'FORMAT = ''CSV'',' +
+        N'FIRSTROW = 2,' +
+        N'FIELDTERMINATOR = '','',' +
+        N'ROWTERMINATOR = ''0x0a'',' +
+        N'FIELDQUOTE = ''"'',' +
+        N'TABLOCK' +
+        N');';
+    EXEC(@sql);
 END
 GO
 
 -- =============================================
 -- Load Notes
 -- =============================================
-CREATE OR ALTER PROCEDURE dbo.Load_Notes
+CREATE OR ALTER PROCEDURE dbo.Load_Notes @base_path NVARCHAR(500)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -356,23 +362,24 @@ BEGIN
         [Note] VARCHAR(MAX) NOT NULL
     );
 
-    BULK INSERT dbo.Notes
-    FROM 'C:\exports\cronometer\notes.csv'
-    WITH (
-        FORMAT = 'CSV',
-        FIRSTROW = 2,
-        FIELDTERMINATOR = ',',
-        ROWTERMINATOR = '0x0a',
-        FIELDQUOTE = '"',
-        TABLOCK
-    );
+    DECLARE @file_path NVARCHAR(1000) = @base_path + N'notes.csv';
+    DECLARE @sql NVARCHAR(MAX);
+    SET @sql = N'BULK INSERT dbo.Notes FROM ''' + @file_path + N''' WITH (' +
+        N'FORMAT = ''CSV'',' +
+        N'FIRSTROW = 2,' +
+        N'FIELDTERMINATOR = '','',' +
+        N'ROWTERMINATOR = ''0x0a'',' +
+        N'FIELDQUOTE = ''"'',' +
+        N'TABLOCK' +
+        N');';
+    EXEC(@sql);
 END
 GO
 
 -- =============================================
 -- Load Fasts
 -- =============================================
-CREATE OR ALTER PROCEDURE dbo.Load_Fasts
+CREATE OR ALTER PROCEDURE dbo.Load_Fasts @base_path NVARCHAR(500)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -388,15 +395,16 @@ BEGIN
         [Comments] NVARCHAR(MAX) NULL
     );
 
-    BULK INSERT dbo.Fasts
-    FROM 'C:\exports\cronometer\fasts.csv'
-    WITH (
-        FORMAT = 'CSV',
-        FIRSTROW = 2,
-        FIELDTERMINATOR = ',',
-        ROWTERMINATOR = '0x0a',
-        FIELDQUOTE = '"',
-        TABLOCK
-    );
+    DECLARE @file_path NVARCHAR(1000) = @base_path + N'fasts.csv';
+    DECLARE @sql NVARCHAR(MAX);
+    SET @sql = N'BULK INSERT dbo.Fasts FROM ''' + @file_path + N''' WITH (' +
+        N'FORMAT = ''CSV'',' +
+        N'FIRSTROW = 2,' +
+        N'FIELDTERMINATOR = '','',' +
+        N'ROWTERMINATOR = ''0x0a'',' +
+        N'FIELDQUOTE = ''"'',' +
+        N'TABLOCK' +
+        N');';
+    EXEC(@sql);
 END
 GO
