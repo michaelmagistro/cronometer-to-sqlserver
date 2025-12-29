@@ -9,16 +9,31 @@
 - Custom Queries to analyze your data in an environment you are familiar with!
 - Full-refresh of the tables from your Cronometer exports.
 
+## Folders
+
+- Create these folders
+  - `C:\exports\cronometer\`
+  - `C:\SQLLogs\cronometer-to-sqlserver\`
+
+
 ## Preparation
 
 - In Cronometer, navigate to and download your desired `.csv` files from the accounts page into `C:\exports\cronometer\` (**ensure you have NO conflict there such as that folder already being used!**)
 - You will need download SQL Server Management Studio and then spin up a SQL Server database to house your exported Cronometer data. Name it `Cronometer` if you like.
+
+## Permissions
+
+- Ensure that each folder you created the SQL Server has permissions to ensure that SQL Server has full control and modify capabilities.
+  - right click the folder > navigate to security > add > `NT SERVICE\SQLSERVERAGENT`
+  - right click the folder > navigate to security > add > `NT SERVICE\MSSQLSERVER`
+- Dump directory of SQL Server Agent should be `C:\Program Files\Microsoft SQL Server\MSSQL17.MSSQLSERVER\MSSQL\LOG\`
 
 ## Setup
 
 - You will need to run `create_alter_loading_procedures.sql` on your newly-created, personal Cronometer database.
 	- This will create (or update) the procedures on your database. It **will not run them**.
 - In order to run your procecures and load your Cronometer data into your personal database, go to the Usage section.
+- 
 
 ## Usage
 

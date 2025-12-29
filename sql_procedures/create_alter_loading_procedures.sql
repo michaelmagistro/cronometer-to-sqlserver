@@ -15,6 +15,7 @@ CREATE OR ALTER PROCEDURE dbo.Load_All_Cronometer_Data @base_path NVARCHAR(500)
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
     PRINT 'Loading Biometrics...'
     EXEC dbo.Load_Biometrics @base_path = @base_path;
