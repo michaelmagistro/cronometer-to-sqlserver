@@ -20,6 +20,7 @@
 
 - In Cronometer, navigate to and download your desired `.csv` files from the accounts page into `C:\exports\cronometer\` (**ensure you have NO conflict there such as that folder already being used!**)
 - You will need download SQL Server Management Studio and then spin up a SQL Server database to house your exported Cronometer data. Name it `Cronometer` if you like.
+- In SQL Server Configuration Manager, ensure that `TCP/IP` is enabled in order for SQL Server Agent to be able to access the server and process the export files.
 
 ## Permissions
 
