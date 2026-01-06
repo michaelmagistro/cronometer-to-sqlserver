@@ -19,7 +19,7 @@ GO
 CREATE OR ALTER VIEW dbo.vw_ServingsCounts
 AS
 
-SELECT TOP 100
+SELECT TOP 10000
     Food_Name,
     COUNT(*) as Counts
 FROM servings
@@ -33,7 +33,7 @@ GO
 CREATE OR ALTER VIEW dbo.vw_ServingsRecency
 AS
 
-SELECT
+SELECT TOP 10000
     Food_Name,
     MAX(
         CAST([Day] AS datetime) + CAST([Time] AS datetime)
@@ -46,11 +46,10 @@ GO
 /* ======= Forgotten Classics ======= */
 
 -- See which items you used to frequently consume in the past, but haven't any more
--- TODO: complete this view.
 CREATE OR ALTER VIEW dbo.vw_ServingsForgottenClassics
 AS
 
-SELECT TOP 100
+SELECT TOP 10000
     Food_Name,
     MAX(
         CAST([Day] AS datetime) + CAST([Time] AS datetime)
@@ -77,7 +76,7 @@ CREATE OR ALTER VIEW dbo.vw_FoodCoOccurrence_ByGroup
 AS
 
 
-SELECT
+SELECT TOP 10000
     a.Food_Name AS Food_A,
     b.Food_Name AS Food_B,
     COUNT(DISTINCT a.[Day]) AS CoOccurrenceDays
@@ -106,7 +105,7 @@ AS
 --END
 --FROM Servings
 
-SELECT
+SELECT TOP 10000
     cleaned_unit_a,
     a.Food_Name AS Food_A,
     b.Food_Name AS Food_B,
@@ -157,38 +156,79 @@ GO
 -- This is for those recipes which you may have "exploded" in the diary, and thus no recipe header name exists for the group
 -- however, you can infer that it appears to be a recipe by fact that they are in the same group (e.g. the lunch grou)
 -- TODO: complete this view
-CREATE OR ALTER VIEW dbo.vw_ServingsForgottenClassics
-AS
+-- CREATE OR ALTER VIEW dbo.vw_EmergentCombosRecipes
+-- AS
 
-select top 100 * from servings order by day desc
-
-SELECT TOP 100
-    Food_Name,
-    MAX(
-        CAST([Day] AS datetime) + CAST([Time] AS datetime)
-    ) AS last_consumed_dt,
-    COUNT(*) as Counts
-FROM servings
-WHERE last_consumed_dt < DATEADD(DAY,20,DATE())
-GROUP BY Food_Name
-ORDER BY Counts DESC
-GO
+-- SELECT TOP 10000
+--     Food_Name,
+--     MAX(
+--         CAST([Day] AS datetime) + CAST([Time] AS datetime)
+--     ) AS last_consumed_dt,
+--     COUNT(*) as Counts
+-- FROM servings
+-- WHERE MAX(CAST([Day] AS datetime) + CAST([Time] AS datetime)) < DATEADD(DAY,20,GETDATE())
+-- GROUP BY Food_Name
+-- ORDER BY Counts DESC
+-- GO
 
 /* ======= Sparingly-used items - Why? ======= */
 
 -- See which items you tried only a few times in the past
 -- Question arises: why did you stop consuming the item? Is that revelation contained in your notes if applicable?
-CREATE OR ALTER VIEW dbo.vw_ServingsForgottenClassics
+-- TODO: complete this view
+-- CREATE OR ALTER VIEW dbo.vw_SparinglyUsedItems
+-- AS
+
+-- SELECT TOP 10000
+--     Food_Name,
+--     MAX(
+--         CAST([Day] AS datetime) + CAST([Time] AS datetime)
+--     ) AS last_consumed_dt,
+--     COUNT(*) as Counts
+-- FROM servings
+-- WHERE MAX(CAST([Day] AS datetime) + CAST([Time] AS datetime)) < DATEADD(DAY,20,GETDATE())
+-- GROUP BY Food_Name
+-- ORDER BY Counts DESC
+-- GO
+
+/* ======= Warning: Supplement Lapse ======= */
+
+-- see which supplements you have not taken for several days.
+-- did you run out? or did they just slip through the cracks? no longer contained in a current recipe?
+-- TODO: complete this view
+CREATE OR ALTER VIEW dbo.vw_SupplementLapse
 AS
 
-SELECT TOP 100
+SELECT TOP 10000
     Food_Name,
     MAX(
         CAST([Day] AS datetime) + CAST([Time] AS datetime)
     ) AS last_consumed_dt,
-    COUNT(*) as Counts
-FROM servings
-WHERE last_consumed_dt < DATEADD(DAY,20,DATE())
+    COUNT(*) as iCount
+FROM servings s
+CROSS APPLY (
+    SELECT CASE 
+        WHEN SUBSTRING(SUBSTRING(s.amount, CHARINDEX(' ', s.amount) + 1, LEN(s.amount)), 0, 2) = 'x '
+        THEN SUBSTRING(s.amount, CHARINDEX(' ', s.amount) + 3, LEN(s.amount))
+        ELSE SUBSTRING(s.amount, CHARINDEX(' ', s.amount) + 1, LEN(s.amount))
+    END AS cleaned_unit_a
+) ca
+WHERE (LOWER(ca.cleaned_unit_a) LIKE '%capsule%'
+OR LOWER(ca.cleaned_unit_a) LIKE '%tablet%'
+OR LOWER(ca.cleaned_unit_a) LIKE '%soft%gel%'
+OR LOWER(ca.cleaned_unit_a) LIKE '%softgel%'
+OR LOWER(ca.cleaned_unit_a) LIKE '%scoop%'
+OR LOWER(ca.cleaned_unit_a) LIKE '%drop%'
+OR LOWER(ca.cleaned_unit_a) LIKE '%caplet%')
+AND Food_Name NOT IN (
+    SELECT DISTINCT
+        Food_Name
+    FROM servings
+    WHERE day > dateadd(day,-7,getdate())
+    GROUP BY Food_Name
+)
+AND day < dateadd(day,-7,getdate())
 GROUP BY Food_Name
-ORDER BY Counts DESC
+--HAVING COUNT(*) > 2
+ORDER BY iCount DESC
 GO
