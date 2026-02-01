@@ -33,6 +33,11 @@ INSERT INTO #Orders VALUES
 SELECT * FROM #Customers;
 SELECT * FROM #Orders;
 
+-- see how string_agg works.
+select customerid, string_agg(o.ProductName, ',') from #Orders o group by customerid
+-- see how string_split works
+select split.* from string_split('1,2,3,4',',') as split
+
 -- ========================================
 -- SCENARIO 1: For each customer, show their friends' names as a list
 -- ========================================

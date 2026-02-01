@@ -33,9 +33,7 @@ WHERE CustomerID = 101;
 -- ========================================
 
 -- Get products per customer
-SELECT 
-	CustomerID,
-	STRING_AGG(ProductName, ', ') AS Products
+SELECT  CustomerID, STRING_AGG(ProductName, ', ') AS Products
 FROM #Orders
 GROUP BY CustomerID;
 
@@ -44,8 +42,7 @@ GROUP BY CustomerID;
 -- ========================================
 
 -- Order the concatenated results
-SELECT 
-	CustomerID,
+SELECT CustomerID,
 	STRING_AGG(ProductName, ', ') WITHIN GROUP (ORDER BY ProductName) AS ProductsAlphabetical,
 	STRING_AGG(ProductName, ', ') WITHIN GROUP (ORDER BY Quantity DESC) AS ProductsByQuantity
 FROM #Orders
